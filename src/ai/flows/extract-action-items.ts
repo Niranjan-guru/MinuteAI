@@ -4,8 +4,6 @@
  * @fileOverview Extracts action items from meeting transcripts, identifying tasks, owners, and deadlines.
  *
  * - extractActionItems - A function that extracts action items from meeting transcripts.
- * - ExtractActionItemsInput - The input type for the extractActionItems function.
- * - ExtractActionItemsOutput - The return type for the extractActionItems function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -16,7 +14,7 @@ const ExtractActionItemsInputSchema = z.object({
     .string()
     .describe('The transcript of the meeting.'),
 });
-export type ExtractActionItemsInput = z.infer<typeof ExtractActionItemsInputSchema>;
+type ExtractActionItemsInput = z.infer<typeof ExtractActionItemsInputSchema>;
 
 const ExtractActionItemsOutputSchema = z.object({
   actionItems: z.array(
@@ -32,6 +30,7 @@ export type ExtractActionItemsOutput = z.infer<typeof ExtractActionItemsOutputSc
 export async function extractActionItems(input: ExtractActionItemsInput): Promise<ExtractActionItemsOutput> {
   const prompt = ai.definePrompt({
     name: 'extractActionItemsPrompt',
+    model: 'googleai/gemini-2.5-flash',
     input: {schema: ExtractActionItemsInputSchema},
     output: {schema: ExtractActionItemsOutputSchema},
     prompt: `You are an AI assistant tasked with extracting action items from meeting transcripts.

@@ -4,8 +4,6 @@
  * @fileOverview Generates Minutes of Meeting (MoM) from a meeting transcription, considering historical MoMs for continuity.
  *
  * - generateMinutesOfMeeting - A function that generates MoM from the provided transcription.
- * - GenerateMinutesOfMeetingInput - The input type for the generateMinutesOfMeeting function.
- * - GenerateMinutesOfMeetingOutput - The return type for the generateMinutesOfMeeting function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -20,7 +18,7 @@ const GenerateMinutesOfMeetingInputSchema = z.object({
     .optional()
     .describe('The content of the previous Minutes of Meeting, if any.'),
 });
-export type GenerateMinutesOfMeetingInput = z.infer<typeof GenerateMinutesOfMeetingInputSchema>;
+type GenerateMinutesOfMeetingInput = z.infer<typeof GenerateMinutesOfMeetingInputSchema>;
 
 const GenerateMinutesOfMeetingOutputSchema = z.object({
   minutesOfMeeting: z.string().describe('The generated Minutes of Meeting document.'),
@@ -34,6 +32,7 @@ export async function generateMinutesOfMeeting(
 ): Promise<GenerateMinutesOfMeetingOutput> {
   const prompt = ai.definePrompt({
     name: 'generateMinutesOfMeetingPrompt',
+    model: 'googleai/gemini-2.5-flash',
     input: {schema: GenerateMinutesOfMeetingInputSchema},
     output: {schema: GenerateMinutesOfMeetingOutputSchema},
     prompt: `You are an AI assistant specialized in generating Minutes of Meeting (MoM) documents from meeting transcriptions.

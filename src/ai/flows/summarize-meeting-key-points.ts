@@ -4,8 +4,6 @@
  *
  * - summarizeMeetingKeyPoints - A function that takes a meeting transcription and optionally a previous MoM
  *   to generate a concise summary of key discussion points and decisions.
- * - SummarizeMeetingKeyPointsInput - The input type for the summarizeMeetingKeyPoints function.
- * - SummarizeMeetingKeyPointsOutput - The return type for the summarizeMeetingKeyPoints function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -20,7 +18,7 @@ const SummarizeMeetingKeyPointsInputSchema = z.object({
     .optional()
     .describe('The content of the previous MoM, if available.'),
 });
-export type SummarizeMeetingKeyPointsInput = z.infer<
+type SummarizeMeetingKeyPointsInput = z.infer<
   typeof SummarizeMeetingKeyPointsInputSchema
 >;
 
@@ -36,6 +34,7 @@ export async function summarizeMeetingKeyPoints(
 ): Promise<SummarizeMeetingKeyPointsOutput> {
   const prompt = ai.definePrompt({
     name: 'summarizeMeetingKeyPointsPrompt',
+    model: 'googleai/gemini-2.5-flash',
     input: {schema: SummarizeMeetingKeyPointsInputSchema},
     output: {schema: SummarizeMeetingKeyPointsOutputSchema},
     prompt: `You are an AI assistant specialized in creating meeting minutes.
