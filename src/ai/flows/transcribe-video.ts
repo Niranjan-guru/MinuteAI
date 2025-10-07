@@ -35,10 +35,9 @@ export async function transcribeVideo(
       outputSchema: TranscribeVideoOutputSchema,
     },
     async ({ videoDataUri }) => {
-      const model = ai.model('googleai/gemini-2.5-flash');
 
       const result = await ai.generate({
-        model,
+        model: 'googleai/gemini-2.5-flash',
         prompt: [
           {
             media: {
