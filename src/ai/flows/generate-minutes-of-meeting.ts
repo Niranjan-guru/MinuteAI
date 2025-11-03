@@ -18,7 +18,7 @@ const GenerateMinutesOfMeetingInputSchema = z.object({
     .optional()
     .describe('The content of the previous Minutes of Meeting, if any.'),
 });
-type GenerateMinutesOfMeetingInput = z.infer<typeof GenerateMinutesOfMeetingInputSchema>;
+export type GenerateMinutesOfMeetingInput = z.infer<typeof GenerateMinutesOfMeetingInputSchema>;
 
 const GenerateMinutesOfMeetingOutputSchema = z.object({
   minutesOfMeeting: z.string().describe('The generated Minutes of Meeting document.'),
@@ -27,15 +27,19 @@ const GenerateMinutesOfMeetingOutputSchema = z.object({
 });
 export type GenerateMinutesOfMeetingOutput = z.infer<typeof GenerateMinutesOfMeetingOutputSchema>;
 
-export async function generateMinutesOfMeeting(
-  input: GenerateMinutesOfMeetingInput
-): Promise<GenerateMinutesOfMeetingOutput> {
-  const prompt = ai.definePrompt({
-    name: 'generateMinutesOfMeetingPrompt',
-    model: 'googleai/gemini-2.5-flash',
-    input: {schema: GenerateMinutesOfMeetingInputSchema},
-    output: {schema: GenerateMinutesOfMeetingOutputSchema},
-    prompt: `You are an AI assistant specialized in generating Minutes of Meeting (MoM) documents from meeting transcriptions.
+const generateMinutesOfMeetingFlow = ai.defineFlow(
+  {
+    name: 'generateMinutesOfMeetingFlow',
+    inputSchema: GenerateMinutesOfMeetingInputSchema,
+    outputSchema: GenerateMinutesOfMeetingOutputSchema,
+  },
+  async (input) => {
+    const prompt = ai.definePrompt({
+      name: 'generateMinutesOfMeetingPrompt',
+      model: 'googleai/gemini-2.5-flash',
+      input: {schema: GenerateMinutesOfMeetingInputSchema},
+      output: {schema: GenerateMinutesOfMeetingOutputSchema},
+      prompt: `You are an AI assistant specialized in generating Minutes of Meeting (MoM) documents from meeting transcriptions.
 
     Your task is to create a comprehensive MoM, identifying key discussion points, decisions made, and specific action items. If a previous MoM is available, consider it as context and create the new MoM as a continuation, updating existing items where necessary.
 
@@ -55,19 +59,15 @@ export async function generateMinutesOfMeeting(
 
     Follow the output schema strictly, especially the Action Items format.
   `,
-  });
+    });
+    
+    const {output} = await prompt(input);
+    return output!;
+  }
+);
 
-  const generateMinutesOfMeetingFlow = ai.defineFlow(
-    {
-      name: 'generateMinutesOfMeetingFlow',
-      inputSchema: GenerateMinutesOfMeetingInputSchema,
-      outputSchema: GenerateMinutesOfMeetingOutputSchema,
-    },
-    async input => {
-      const {output} = await prompt(input);
-      return output!;
-    }
-  );
-
+export async function generateMinutesOfMeeting(
+  input: GenerateMinutesOfMeetingInput
+): Promise<GenerateMinutesOfMeetingOutput> {
   return generateMinutesOfMeetingFlow(input);
 }
