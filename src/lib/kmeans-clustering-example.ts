@@ -9,14 +9,19 @@
  *
  * 1.  Preprocessing: The transcript is split into individual sentences or meaningful chunks.
  * 2.  Vectorization: Each sentence is converted into a numerical vector. This is the most
- *     critical step. A simple "bag-of-words" approach is used here, but more advanced
- *     methods like TF-IDF or word embeddings (e.g., Word2Vec, GloVe) would yield
- *     better results in a real-world application.
+ *     critical step. The quality of the vectors determines the quality of the clustering.
+ *     - A basic approach (like the "bag-of-words" used below) only counts word occurrences and
+ *       lacks semantic understanding. It sees "car" and "automobile" as completely different.
+ *     - A SUPERIOR APPROACH: Use a Large Language Model (LLM) to generate "embeddings".
+ *       An embedding is a dense vector that captures the semantic meaning of the text.
+ *       Using an LLM, sentences like "The project deadline is tight" and "We don't have much
+ *       time left on this initiative" would have very similar vectors, leading to far more
+ *       accurate topic clustering.
  * 3.  Clustering: The K-Means algorithm is applied to these vectors to group them into
- *     'K' clusters based on their proximity in the vector space. Sentences with similar
- *     word content will end up in the same cluster.
- * 4.  Interpretation: The clusters can then be interpreted as different topics or
- *     themes discussed during the meeting.
+ *     'K' clusters based on their proximity in the vector space.
+ * 4.  Interpretation: The clusters can then be interpreted as different topics discussed
+ *     during the meeting. With LLM embeddings, these clusters are semantically meaningful.
+ *     We could even use an LLM again to summarize each cluster and assign it a topic label.
  */
 
 // --- Sample Data ---
@@ -39,15 +44,14 @@ const sentences = sampleTranscript
   .map(s => s.toLowerCase().replace(/[^\w\s]/g, '')); // Clean punctuation and lowercase
 
 // --- 2. Vectorization (Simplified Bag-of-Words) ---
+// NOTE: This is the step that would be replaced by an LLM embedding model for superior results.
 
 // Create a vocabulary of all unique words in the transcript.
 const vocabulary = [
   ...new Set(sentences.join(' ').split(' ')),
 ].filter(Boolean);
 
-// Convert each sentence into a numerical vector.
-// Each position in the vector corresponds to a word in the vocabulary.
-// The value is 1 if the word is present in the sentence, 0 otherwise.
+// Convert each sentence into a numerical vector based on word presence.
 const vectors = sentences.map(sentence => {
   const sentenceWords = new Set(sentence.split(' '));
   return vocabulary.map(word => (sentenceWords.has(word) ? 1 : 0));
@@ -135,7 +139,7 @@ console.log('Original Sentences:', sentences);
 console.log('\nCluster Assignments:', clusterAssignments);
 
 for (let i = 0; i < numberOfClusters; i++) {
-  console.log(`\n--- Cluster ${i + 1} ---`);
+  console.log(`\n--- Cluster ${i + 1} (Topic ${String.fromCharCode(65 + i)}) ---`);
   sentences.forEach((sentence, index) => {
     if (clusterAssignments[index] === i) {
       console.log(`  - "${sentence}"`);
@@ -146,15 +150,16 @@ for (let i = 0; i < numberOfClusters; i++) {
  * EXPECTED-LIKE CONSOLE OUTPUT:
  * (The exact clustering can vary slightly due to random initialization)
  *
- * --- Cluster 1 ---
+ * --- Cluster 1 (Topic A) ---
  *   - "sarah: the new ad designs for the campaign are ready for review"
  *   - "tom: i am concerned about the color palette on the facebook ads"
  *   - "sarah: we need to finalize the launch date for the marketing campaign"
  *   - "tom: the visuals for instagram look solid the colors work well there"
- * --- Cluster 2 ---
+ * --- Cluster 2 (Topic B) ---
  *   - "maya: the blog post about our top 10 features is halfway done"
  *   - "maya: i will finish the draft of the blog post by this friday"
  *
  * This demonstrates how the algorithm grouped sentences about 'ads/campaign'
- * into one cluster and sentences about the 'blog post' into another.
+ * into one cluster and sentences about the 'blog post' into another. Using LLM
+ * embeddings would make this process far more robust and accurate for complex transcripts.
  */
